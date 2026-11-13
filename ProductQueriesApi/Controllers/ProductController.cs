@@ -161,4 +161,58 @@ public class ProductController : ControllerBase
     }
 
     //Tablet ი დარჩება მაგრამ მისი სია ცარიელი იქნება
+
+
+    //ამოცანა 3.1. FromSql (SELECT) Raw SQL-ით ამოიღეთ პროდუქტები, რომელთა ფასი მეტია ცვლადში შენახულ მნიშვნელობაზე(min = 600).გამოიყენეთ პარამეტრიზაცია.
+
+    [HttpGet("GetProductWithRawSQL")]
+
+    public IActionResult GetProductWithRawSQL()
+    {
+        var min = 600;
+
+        var products = _db.Products
+            .FromSql($"SELECT Id, Name, Price, CategoryId From Products Where Products.Price > {min}")
+            .ToList();
+
+        return Ok(products);
+    }
+
+
+    //ამოცანა 3.2. Raw SQL + LINQ წინა მოთხოვნას დაუმატეთ LINQ-ით OrderBy(p => p.Name).
+
+    [HttpGet("GetProductWithRawSQL+OrderBy")]
+
+    public IActionResult GetProductWithRawSQLOrderBy()
+    {
+        var min = 600;
+
+        var products = _db.Products
+            .FromSql($"SELECT Id, Name, Price, CategoryId From Products Where Products.Price > {min}")
+            .OrderBy(p => p.Name)
+            .ToList();
+
+        return Ok(products);
+    }
+
+    //ამოცანა 3.3. ExecuteSql (UPDATE) გაზარდეთ პირველი კატეგორიის ყველა პროდუქტის ფასი 10 % -ით.რამდენი ჩანაწერი შეიცვალა?
+    [HttpPatch("UpdateFirstCategoryPrice")]
+    public IActionResult UpdateFirstCategoryPrice()
+    {
+        var result = _db.Database.ExecuteSql($"UPDATE Products Set Price = Price * 1.1 Where CategoryId = 1");
+
+        return Ok(new {result});
+
+    }
+
+
+    //ამოცანა 3.4. უსაფრთხოება იპოვეთ შეცდომა კოდში და გაასწორეთ:
+
+    //var name = Console.ReadLine();
+    //var list = db.Products
+    // .FromSql($"SELECT * FROM Products WHERE Name = {name}")
+    // .ToList();
+
+
+
 }
